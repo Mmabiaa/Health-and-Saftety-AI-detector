@@ -34,7 +34,6 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
   const [isInitializing, setIsInitializing] = useState(false);
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [countdown, setCountdown] = useState(3);
-  const [streamId, setStreamId] = useState<string | null>(null);
 
   const startCamera = async () => {
     try {
@@ -62,21 +61,6 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
         videoRef.current.srcObject = mediaStream;
         setIsCameraActive(true);
       }
-
-      // Generate stream ID and share with admin portal
-      const newStreamId = `stream_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      setStreamId(newStreamId);
-      
-      // Share stream with admin portal
-      if (typeof window !== 'undefined' && (window as any).cameraStreamService) {
-        (window as any).cameraStreamService.addStream({
-          workerId,
-          entryPoint,
-          streamId: newStreamId,
-          timestamp: new Date(),
-          isActive: true,
-        });
-      }
       
       // Clear restart state when camera starts successfully
       if (onRestart) {
@@ -99,11 +83,6 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
-    }
-
-    // Deactivate stream in admin portal
-    if (streamId && typeof window !== 'undefined' && (window as any).cameraStreamService) {
-      (window as any).cameraStreamService.deactivateStream(streamId);
     }
   };
 
@@ -130,11 +109,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     // Convert to base64 string
     const imageData = canvas.toDataURL('image/jpeg', 0.8);
     
-    // Update stream image in admin portal
-    if (streamId && typeof window !== 'undefined' && (window as any).cameraStreamService) {
-      (window as any).cameraStreamService.updateStreamImage(streamId, imageData);
-    }
-    
+    // Send image directly to WorkerInterface for Roboflow processing
     onCapture(imageData);
   };
 
@@ -156,33 +131,6 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
       });
     }, 1000);
   };
-
-  // Auto-capture image every 5 seconds when camera is active (for live feed)
-  useEffect(() => {
-    if (!isCameraActive || isCountdownActive) return;
-
-    const interval = setInterval(() => {
-      if (videoRef.current && canvasRef.current) {
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        const context = canvas.getContext('2d');
-
-        if (context) {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageData = canvas.toDataURL('image/jpeg', 0.6); // Lower quality for live feed
-          
-          // Update stream image in admin portal
-          if (streamId && typeof window !== 'undefined' && (window as any).cameraStreamService) {
-            (window as any).cameraStreamService.updateStreamImage(streamId, imageData);
-          }
-        }
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [isCameraActive, isCountdownActive, streamId]);
 
   useEffect(() => {
     // Start camera when component mounts
@@ -369,4 +317,4 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
   );
 };
 
-export default CameraCapture; 
+export default CameraCapture;
