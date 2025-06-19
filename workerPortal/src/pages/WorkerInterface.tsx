@@ -252,11 +252,10 @@ const WorkerInterface = () => {
    
     const equipmentMapping = {
       'safety vest': 'vest',
-      'helmet': 'helmet',
-      'boots': 'boots'
+      'helmet': 'helmet'
     };
    
-    const requiredEquipment = ['vest', 'helmet', 'boots'];
+    const requiredEquipment = ['vest', 'helmet'];
     const detectedEquipment: string[] = [];
     const missingEquipment: string[] = [];
    
@@ -269,9 +268,6 @@ const WorkerInterface = () => {
           break;
         case 'helmet':
           isDetected = detectedClasses.includes('helmet');
-          break;
-        case 'boots':
-          isDetected = detectedClasses.includes('boots');
           break;
       }
      
@@ -298,14 +294,12 @@ const WorkerInterface = () => {
       switch(item.toLowerCase()) {
         case 'vest': return 'Safety Vest';
         case 'helmet': return 'Helmet';
-        case 'boots': return 'Safety Boots';
         default: return item;
       }
     });
 
     if (items.length === 1) return `${items[0]} not detected`;
-    if (items.length === 2) return `${items[0]} and ${items[1]} not detected`;
-    return `${items[0]}, ${items[1]}, and ${items[2]} not detected`;
+    return `${items[0]} and ${items[1]} not detected`;
   };
 
   const getDetectedEquipmentMessage = (detectedItems: string[]): string => {
@@ -315,14 +309,12 @@ const WorkerInterface = () => {
       switch(item.toLowerCase()) {
         case 'vest': return 'Safety Vest';
         case 'helmet': return 'Helmet';
-        case 'boots': return 'Safety Boots';
         default: return item;
       }
     });
 
     if (items.length === 1) return `${items[0]} detected`;
-    if (items.length === 2) return `${items[0]} and ${items[1]} detected`;
-    return `${items[0]}, ${items[1]}, and ${items[2]} detected`;
+    return `${items[0]} and ${items[1]} detected`;
   };
 
   const saveSafetyCheckToDatabase = async (
@@ -420,7 +412,6 @@ const WorkerInterface = () => {
           switch(item.toLowerCase()) {
             case 'vest': return 'No Safety Vest';
             case 'helmet': return 'No Helmet';
-            case 'boots': return 'No Safety Boots';
             default: return `No ${item}`;
           }
         });
@@ -605,13 +596,6 @@ const WorkerInterface = () => {
                   <p className="text-xs text-slate-500">High-visibility vest required</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-                <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                <div>
-                  <span className="font-medium text-slate-700">Safety Boots</span>
-                  <p className="text-xs text-slate-500">Steel-toed boots must be visible</p>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -735,7 +719,6 @@ const WorkerInterface = () => {
                       <li>• Ensure all safety equipment is properly worn and visible</li>
                       <li>• Check that your hardhat is on your head</li>
                       <li>• Verify your safety vest is visible and not covered</li>
-                      <li>• Make sure safety boots are in the camera frame</li>
                       <li>• Position yourself facing the camera clearly</li>
                       {cameraNeedsRestart && <li className="text-amber-700 font-medium">• Restart camera before proceeding</li>}
                     </ul>
