@@ -14,6 +14,7 @@ interface Worker {
   id: string;
   secretNumber: string;
   entryPoint: string;
+  name: string;
 }
 
 interface RoboflowPrediction {
@@ -77,7 +78,7 @@ const ROBOFLOW_API_URL = "https://serverless.roboflow.com/safety-pyazl/1";
 const ROBOFLOW_API_KEY = "4s8SWfOoHTYag8RSgKuW";
 
 const WorkerInterface = () => {
-  const [worker, setWorker] = useState<Worker>({ id: '', secretNumber: '', entryPoint: '' });
+  const [worker, setWorker] = useState<Worker>({ id: '', secretNumber: '', entryPoint: '', name: '' });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [captureAttempts, setCaptureAttempts] = useState<CaptureResult[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -106,9 +107,10 @@ const WorkerInterface = () => {
       console.log('Attempting to authenticate worker:', worker.id);
       console.log('Entry point:', worker.entryPoint);
       
+      // Updated query to also fetch the name field
       const { data, error } = await supabase
         .from('workers')
-        .select('worker_id, secret_code')
+        .select('worker_id, secret_code, name') // Added 'name' to the select
         .eq('worker_id', worker.id)
         .single();
 
@@ -136,6 +138,7 @@ const WorkerInterface = () => {
 
       console.log('✅ Worker found in database');
       console.log('Worker ID from DB:', data.worker_id);
+      console.log('Worker Name from DB:', data.name); // Log the name
       console.log('Secret code exists:', !!data.secret_code);
       
       if (!data.secret_code || data.secret_code.trim() === '') {
@@ -168,6 +171,13 @@ const WorkerInterface = () => {
       }
 
       console.log('✅ ALL AUTHENTICATION CHECKS PASSED');
+      
+      // Update the worker state with the name from database
+      setWorker(prevWorker => ({
+        ...prevWorker,
+        name: data.name || 'Unknown Worker' // Fallback if name is null/undefined
+      }));
+      
       authenticationSuccessful = true;
 
     } catch (error) {
@@ -452,7 +462,7 @@ const WorkerInterface = () => {
          
           setCaptureAttempts([]);
           setIsLoggedIn(false);
-          setWorker({ id: '', secretNumber: '', entryPoint: '' });
+          setWorker({ id: '', secretNumber: '', entryPoint: '', name: '' });
           setCameraNeedsRestart(false);
           setSessionStartTime(null);
         } else {
@@ -480,7 +490,7 @@ const WorkerInterface = () => {
   const handleLogout = () => {
     console.log('Logging out user...');
     setIsLoggedIn(false);
-    setWorker({ id: '', secretNumber: '', entryPoint: '' });
+    setWorker({ id: '', secretNumber: '', entryPoint: '', name: '' });
     setCaptureAttempts([]);
     setCameraNeedsRestart(false);
     setSessionStartTime(null);
@@ -556,8 +566,9 @@ const WorkerInterface = () => {
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="text-xl text-slate-800">Safety Equipment Verification</CardTitle>
-                <CardDescription className="text-slate-600">
-                  Worker ID: {worker.id} | Entry Point: {worker.entryPoint}
+                <CardDescription className="text-slate-600 space-y-1">
+                  <div>Worker ID: {worker.id} | Entry Point: {worker.entryPoint}</div>
+                  <div className="font-medium text-emerald-700 text-lg">HELLO, {worker.name?.toUpperCase() || 'UNKNOWN WORKER'}</div>
                 </CardDescription>
               </div>
               <Button

@@ -16,7 +16,7 @@ const Index = () => {
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-800">SafeMine Pro</h1>
+                <h1 className="text-xl font-bold text-slate-800">SafetyWatch Pro</h1>
                 <p className="text-sm text-slate-600">Sustainable Mining Safety Platform</p>
               </div>
             </div>
